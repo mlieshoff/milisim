@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>multisim-plugins-ekahau</artifactId>
+  <packaging>pom</packaging>
+  <version>1.0.0-SNAPSHOT</version>
+
+    <parent>
+        <groupId>org.mili.multisim</groupId>
+        <artifactId>multisim-plugins</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+  <modules>
+      <module>multisim-plugins-ekahau-plugin</module>
+      <module>multisim-plugins-ekahau-web</module>
+      <module>multisim-plugins-ekahau-console</module>
+  </modules>
+</project>
