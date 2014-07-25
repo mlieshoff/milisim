@@ -1,11 +1,11 @@
 package org.mili.multisim.core.server;
 
-import org.mili.multisim.core.plugin.HeartbeatEvent;
 import org.mili.multisim.connector.socket.SimulatorListener;
 import org.mili.multisim.core.plugin.Plugin;
-import org.mili.multisim.core.plugin.PluginEvent;
 import org.mili.multisim.core.plugin.PluginEventListener;
 import org.mili.multisim.core.plugin.PluginManager;
+
+import java.util.Collection;
 
 /**
  * @author
@@ -45,7 +45,7 @@ public class Simulator implements PluginEventListener {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    simulatorListener.onEvent(new HeartbeatEvent());
+                    simulatorListener.onEvent(String.valueOf(System.currentTimeMillis()).getBytes());
                 }
             }
         }).start();
@@ -56,9 +56,12 @@ public class Simulator implements PluginEventListener {
         this.simulatorListener = simulatorListener;
     }
 
-    @Override
-    public void onEvent(PluginEvent pluginEvent) {
-        simulatorListener.onEvent(pluginEvent);
+    public Collection<Plugin> getPlugins() {
+        return pluginManager.getPlugins();
     }
 
+    @Override
+    public void onEvent(byte[] pluginEvent) {
+        simulatorListener.onEvent(pluginEvent);
+    }
 }

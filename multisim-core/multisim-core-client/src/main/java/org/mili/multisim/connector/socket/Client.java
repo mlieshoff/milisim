@@ -1,9 +1,7 @@
 package org.mili.multisim.connector.socket;
 
-import org.mili.multisim.core.plugin.Call;
-import org.mili.multisim.core.plugin.Event;
-import org.mili.multisim.core.plugin.Result;
 import org.mili.multisim.util.Log;
+import org.mili.multisim.util.Utils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,8 +37,7 @@ public class Client {
                         byte[] bytes = Utils.readFromStream(listenerSocket.getInputStream(), listenerSocket.getReceiveBufferSize());
                         if (bytes.length > 0) {
                             Log.debug(this, "run", "bytes received: %s", bytes.length);
-                            Event event = Utils.bytesToObject(bytes);
-                            fireEvent(event);
+                            fireEvent(bytes);
                         } else {
                             listenerSocket = Utils.connect(host, listenerPort);
                         }
@@ -53,7 +50,7 @@ public class Client {
         }).start();
     }
 
-    private void fireEvent(Event event) {
+    private void fireEvent(byte[] event) {
         Log.debug(this, "fireEvent", "event: %s", event);
         if (simulatorListener != null) {
             simulatorListener.onEvent(event);
@@ -64,17 +61,15 @@ public class Client {
         this.simulatorListener = simulatorListener;
     }
 
-    public Result call(Call call) {
+    public byte[] call(byte[] call) {
         socket = Utils.connect(host, port);
         try {
             OutputStream outputStream = socket.getOutputStream();
-            byte[] callBytes = Utils.objectToBytes(call);
-            outputStream.write(callBytes, 0, callBytes.length);
+            outputStream.write(call, 0, call.length);
             outputStream.flush();
 
             InputStream inputStream = socket.getInputStream();
-            byte[] bytesObject = Utils.readFromStream(inputStream, socket.getReceiveBufferSize());
-            return Utils.bytesToObject(bytesObject);
+            return Utils.readFromStream(inputStream, socket.getReceiveBufferSize());
         } catch (Exception e) {
             Log.error(this, "call", "error while calling: %s", e.getMessage());
         }

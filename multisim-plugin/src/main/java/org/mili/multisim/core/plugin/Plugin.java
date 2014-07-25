@@ -9,11 +9,11 @@ public interface Plugin {
 
     void stop();
 
-    Result call(Call call);
+    byte[] call(byte[] call);
 
     String getName();
 
-    void fireEvent(PluginEvent pluginEvent);
+    void fireEvent(byte[] pluginEvent);
 
     void addListener(PluginEventListener pluginEventListener);
 

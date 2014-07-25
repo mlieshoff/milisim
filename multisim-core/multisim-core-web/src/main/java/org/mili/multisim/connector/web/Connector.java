@@ -37,16 +37,14 @@ public class Connector implements SimulatorListener {
         }
     }
 
-    public Result call(Call call) {
+    public byte[] call(byte[] call) {
         return client.call(call);
     }
 
     @Override
-    public void onEvent(Event event) {
+    public void onEvent(byte[] event) {
         Log.info(this, "onEvent", "event received: %s", event);
-        if (event instanceof PluginEvent) {
-            pluginEventListener.onEvent((PluginEvent) event);
-        }
+        pluginEventListener.onEvent(event);
     }
 
     public void registerPluginEventListener(PluginEventListener pluginEventListener) {

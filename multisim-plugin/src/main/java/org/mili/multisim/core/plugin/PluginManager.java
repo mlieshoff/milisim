@@ -1,5 +1,6 @@
 package org.mili.multisim.core.plugin;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +29,10 @@ public class PluginManager {
 
     public Plugin get(String pluginId) {
         return plugins.get(pluginId);
+    }
+
+    public Collection<Plugin> getPlugins() {
+        return plugins.values();
     }
 
 }

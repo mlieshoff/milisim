@@ -20,12 +20,13 @@ public class EchoPlugin extends AbstractPlugin {
     }
 
     @Override
-    public Result call(Call call) {
-        Result result = new Result();
-        if ("ping".equals(call.getMethodName())) {
-            result.addParameter(SimulatorParameters.STATUS, "pong");
+    public byte[] call(byte[] call) {
+        String message = new String(call).trim();
+
+        if ("ping".equals(message)) {
+            return "pong".getBytes();
         }
-        return result;
+        return null;
     }
 
 }
