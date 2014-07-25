@@ -1,10 +1,7 @@
 package org.mili.multisim.connector.web;
 
 import org.apache.commons.codec.binary.Base64;
-import org.mili.multisim.connector.socket.Utils;
-import org.mili.multisim.core.plugin.Call;
 import org.mili.multisim.core.plugin.PluginEventListener;
-import org.mili.multisim.core.plugin.Result;
 import org.mili.multisim.util.Log;
 
 import javax.servlet.ServletConfig;
@@ -48,13 +45,13 @@ public class SimulatorServlet extends javax.servlet.http.HttpServlet {
         resp.setContentType("text/html");
         resp.setCharacterEncoding("utf-8");
 
-        Call call = Utils.bytesToObject(Base64.decodeBase64(base64Command));
+        byte[] call = Base64.decodeBase64(base64Command);
         Log.debug(this, "service", "call=%s", call);
 
-        Result result = Connector.getInstance().call(call);
+        byte[] result = Connector.getInstance().call(call);
 
         PrintWriter printWriter = resp.getWriter();
-        printWriter.print(Base64.encodeBase64String(Utils.objectToBytes(result)));
+        printWriter.print(Base64.encodeBase64String(result));
         printWriter.flush();
 
         resp.setStatus(200);

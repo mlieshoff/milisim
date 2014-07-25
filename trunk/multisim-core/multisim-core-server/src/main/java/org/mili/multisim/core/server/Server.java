@@ -1,11 +1,8 @@
 package org.mili.multisim.core.server;
 
 import org.mili.multisim.connector.socket.SimulatorListener;
-import org.mili.multisim.connector.socket.Utils;
-import org.mili.multisim.core.plugin.Call;
-import org.mili.multisim.core.plugin.Event;
+import org.mili.multisim.util.Utils;
 import org.mili.multisim.core.plugin.Plugin;
-import org.mili.multisim.core.plugin.Result;
 import org.mili.multisim.util.Log;
 
 import java.io.IOException;
@@ -31,7 +28,7 @@ public class Server implements SimulatorListener {
 
     private List<Socket> listeners = new Vector<>();
 
-    private Deque<Event> events = new ConcurrentLinkedDeque<>();
+    private Deque<byte[]> events = new ConcurrentLinkedDeque<>();
 
     private void start() throws Exception {
         Log.info(this, "start", "starting...");
@@ -91,11 +88,16 @@ public class Server implements SimulatorListener {
                         OutputStream outputStream = socket.getOutputStream();
                         InputStream inputStream = socket.getInputStream();
 
-                        Call call = readCallFromClient(inputStream, socket.getReceiveBufferSize());
-                        Plugin plugin = simulator.getPlugin(call.getPluginId());
-                        Result result = plugin.call(call);
+                        byte[] call = readCallFromClient(inputStream, socket.getReceiveBufferSize());
 
-                        sendResultToClient(result, outputStream);
+                        for (Plugin plugin : simulator.getPlugins()) {
+                            byte[] result = plugin.call(call);
+
+                            if (result != null) {
+                                Log.debug(this, "CALL", "plugin[%s] answers: [%s]", plugin.getName(), new String(result));
+                                sendResultToClient(result, outputStream);
+                            }
+                        }
 
                         socket.close();
 
@@ -110,7 +112,7 @@ public class Server implements SimulatorListener {
                 @Override
                 public void run() {
                     while (true) {
-                        Event event = events.poll();
+                        byte[] event = events.poll();
                         if (event != null) {
                             for (Iterator<Socket> iterator = listeners.iterator(); iterator.hasNext(); ) {
                                 Socket socket = iterator.next();
@@ -135,27 +137,31 @@ public class Server implements SimulatorListener {
         }
     }
 
-    private void sendResultToClient(Result result, OutputStream outputStream) throws IOException {
-        byte[] bytes = Utils.objectToBytes(result);
+    private void sendResultToClient(byte[] bytes, OutputStream outputStream) throws IOException {
+        Log.debug(this, "sendResultToClient", "send [%s] to client", new String(bytes));
         outputStream.write(bytes, 0, bytes.length);
         outputStream.flush();
     }
 
-    private Call readCallFromClient(InputStream inputStream, int bufferSize) throws IOException {
+    private byte[] readCallFromClient(InputStream inputStream, int bufferSize) throws IOException {
         byte[] bytes = Utils.readFromStream(inputStream, bufferSize);
-        return Utils.bytesToObject(bytes);
+        Log.debug(this, "readCallFromClient", "read [%s] from client", new String(bytes));
+        return bytes;
+    }
+
+    private byte[] readBytesFromClient(InputStream inputStream, int bufferSize) throws IOException {
+        return Utils.readFromStream(inputStream, bufferSize);
     }
 
     @Override
-    public void onEvent(Event event) {
-        Log.debug(this, "onEvent", "add event [%s] to queue [%s]", event, events.size());
+    public void onEvent(byte[] event) {
+        Log.debug(this, "onEvent", "add event [%s] to queue [%s]", new String(event), events.size());
         events.add(event);
     }
 
-    private void sendEventToClient(Event event, OutputStream outputStream) throws IOException {
-        Log.debug(this, "sendEventToClient", "send event [%s] to client", event);
-        byte[] bytes = Utils.objectToBytes(event);
-        outputStream.write(bytes, 0, bytes.length);
+    private void sendEventToClient(byte[] event, OutputStream outputStream) throws IOException {
+        Log.debug(this, "sendEventToClient", "send event [%s] to client", new String(event));
+        outputStream.write(event, 0, event.length);
         outputStream.flush();
     }
 

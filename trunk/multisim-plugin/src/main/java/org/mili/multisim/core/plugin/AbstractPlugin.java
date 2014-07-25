@@ -56,7 +56,7 @@ public abstract class AbstractPlugin implements Plugin {
     }
 
     @Override
-    public void fireEvent(PluginEvent pluginEvent) {
+    public void fireEvent(byte[] pluginEvent) {
         for (PluginEventListener pluginEventListener : listeners) {
             pluginEventListener.onEvent(pluginEvent);
         }

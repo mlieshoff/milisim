@@ -5,6 +5,6 @@ package org.mili.multisim.core.plugin;
  */
 public interface PluginEventListener {
 
-    void onEvent(PluginEvent pluginEvent);
+    void onEvent(byte[] pluginEvent);
 
 }
